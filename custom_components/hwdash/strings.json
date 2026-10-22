@@ -1,0 +1,78 @@
+{
+  "title": "HomeWizard Dashboard",
+  "config": {
+    "step": {
+      "user": {
+        "title": "HomeWizard Dashboard",
+        "description": "Adds a HomeWizard-style panel to the sidebar. HomeWizard devices are detected automatically; prices and other options can be set later via Configure.",
+        "data": {
+          "sidebar_title": "Sidebar title",
+          "sidebar_icon": "Icon",
+          "url_path": "URL path (e.g. homewizard)",
+          "require_admin": "Visible to administrators only"
+        }
+      }
+    },
+    "error": {
+      "invalid_url_path": "Only lowercase letters, digits, - and _"
+    },
+    "abort": {
+      "single_instance_allowed": "Already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "HomeWizard Dashboard",
+        "description": "Changes apply immediately; reload the panel in your browser or app afterwards.",
+        "data": {
+          "sidebar_title": "Sidebar title",
+          "sidebar_icon": "Icon",
+          "url_path": "URL path (e.g. homewizard)",
+          "require_admin": "Visible to administrators only",
+          "prijs_kwh": "Fixed price (only used without cost statistics in the Energy dashboard)",
+          "saldering": "Net metering (feed-in at the same price)",
+          "teruglever_prijs": "Feed-in price without net metering",
+          "stroom_totaal": "Electricity total card",
+          "jaar_start_dag": "Year overview start day",
+          "jaar_start_maand": "Year overview start month",
+          "solar_counter": "Solar kWh meter counter used for production",
+          "battery_power_sign": "Battery power sign",
+          "overrides": "Manual mapping (overrides)"
+        },
+        "data_description": {
+          "prijs_kwh": "Costs preferably come from the HA Energy dashboard. This price is the fallback.",
+          "overrides": "E.g. {\"solar\": [...]}. Leave empty for automatic detection.",
+          "stroom_totaal": "Automatic: net metering until end of 2026, import and export separately from 1 Jan 2027.",
+          "jaar_start_dag": "E.g. 1 and 4 for a contract year from 1 April; the year view then shows 2026/2027."
+        }
+      }
+    },
+    "error": {
+      "invalid_url_path": "Only lowercase letters, digits, - and _",
+      "invalid_overrides": "Must be an object (mapping)"
+    }
+  },
+  "selector": {
+    "solar_counter": {
+      "options": {
+        "auto": "Automatic (largest counter)",
+        "import": "Import",
+        "export": "Export"
+      }
+    },
+    "battery_power_sign": {
+      "options": {
+        "1": "Positive = charging",
+        "-1": "Positive = discharging"
+      }
+    },
+    "stroom_totaal": {
+      "options": {
+        "auto": "Automatic (separate from 2027)",
+        "netto": "Always net (net metering)",
+        "apart": "Import and export separately"
+      }
+    }
+  }
+}

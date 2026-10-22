@@ -1,0 +1,20 @@
+{
+  "domain": "hwdash",
+  "name": "HomeWizard Dashboard",
+  "codeowners": [
+    "@rvdlinden"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "frontend",
+    "http",
+    "panel_custom"
+  ],
+  "documentation": "https://github.com/rvdlinden/HomeWizard-Dashboard",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/rvdlinden/HomeWizard-Dashboard/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "1.0.0"
+}

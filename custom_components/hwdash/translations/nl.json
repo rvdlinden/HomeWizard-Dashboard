@@ -1,0 +1,78 @@
+{
+  "title": "HomeWizard Dashboard",
+  "config": {
+    "step": {
+      "user": {
+        "title": "HomeWizard Dashboard",
+        "description": "Voegt een panel in HomeWizard-stijl toe aan de zijbalk. De HomeWizard-apparaten worden automatisch gevonden; prijzen en overige opties stel je later in via Configureren.",
+        "data": {
+          "sidebar_title": "Naam in de zijbalk",
+          "sidebar_icon": "Icoon",
+          "url_path": "URL-pad (bijv. homewizard)",
+          "require_admin": "Alleen zichtbaar voor beheerders"
+        }
+      }
+    },
+    "error": {
+      "invalid_url_path": "Alleen kleine letters, cijfers, - en _"
+    },
+    "abort": {
+      "single_instance_allowed": "Het dashboard is al geïnstalleerd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "HomeWizard Dashboard",
+        "description": "Wijzigingen zijn direct actief; herlaad daarna het panel in je browser of app.",
+        "data": {
+          "sidebar_title": "Naam in de zijbalk",
+          "sidebar_icon": "Icoon",
+          "url_path": "URL-pad (bijv. homewizard)",
+          "require_admin": "Alleen zichtbaar voor beheerders",
+          "prijs_kwh": "Vaste stroomprijs (alleen zonder kostenstatistiek in het Energie-dashboard)",
+          "saldering": "Saldering (teruglevering tegen dezelfde prijs)",
+          "teruglever_prijs": "Terugleverprijs zonder saldering",
+          "stroom_totaal": "Weergave Stroom totaal",
+          "jaar_start_dag": "Startdag jaaroverzicht",
+          "jaar_start_maand": "Startmaand jaaroverzicht",
+          "solar_counter": "Teller voor opwek van de zon-kWh-meter",
+          "battery_power_sign": "Teken van het batterijvermogen",
+          "overrides": "Handmatige mapping (overrides)"
+        },
+        "data_description": {
+          "prijs_kwh": "Kosten komen bij voorkeur uit het HA Energie-dashboard (bijv. een dynamisch contract). Deze prijs is de terugval.",
+          "overrides": "Bijv. {\"solar\": [{\"name\": \"Zon\", \"energy\": \"sensor.x\", \"power\": \"sensor.y\"}]}. Leeg laten voor automatische detectie.",
+          "stroom_totaal": "Automatisch: netto (saldering) t/m 2026, afname en teruglevering apart vanaf 1 jan 2027.",
+          "jaar_start_dag": "Bijv. 1 en 4 voor een contractjaar vanaf 1 april (jaarafrekening); het jaaroverzicht toont dan 2026/2027."
+        }
+      }
+    },
+    "error": {
+      "invalid_url_path": "Alleen kleine letters, cijfers, - en _",
+      "invalid_overrides": "Moet een object (mapping) zijn"
+    }
+  },
+  "selector": {
+    "solar_counter": {
+      "options": {
+        "auto": "Automatisch (hoogste teller)",
+        "import": "Import",
+        "export": "Export"
+      }
+    },
+    "battery_power_sign": {
+      "options": {
+        "1": "Positief = laden",
+        "-1": "Positief = ontladen"
+      }
+    },
+    "stroom_totaal": {
+      "options": {
+        "auto": "Automatisch (apart vanaf 2027)",
+        "netto": "Altijd netto (saldering)",
+        "apart": "Afname en teruglevering apart"
+      }
+    }
+  }
+}
