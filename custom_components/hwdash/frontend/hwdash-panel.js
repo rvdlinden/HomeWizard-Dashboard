@@ -3,7 +3,7 @@
  * Zelfde weergave als de HomeWizard Energy-app; alle data via de HA-sessie
  * (hass.states en hass.callWS), dus zonder tokens of losse servers.
  * ===================================================================== */
-const HWDASH_VERSION = "1.0.0";
+const HWDASH_VERSION = "1.0.1";
 const CHART_URL = new URL("./chart.umd.min.js", import.meta.url).href;
 
 function loadChart() {
