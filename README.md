@@ -37,18 +37,67 @@ De data komt uit de HomeWizard-integratie die je al in HA hebt draaien.
 - Werkt in de browser en in de HA Companion-app, en gebruikt je ingelogde sessie.
   Je hebt dus geen tokens of losse servers nodig.
 
+## Vereisten
+
+- Home Assistant **2024.6** of nieuwer.
+- [HACS](https://hacs.xyz/docs/use/) is geïnstalleerd (alleen nodig voor installatie via HACS).
+- De officiële **HomeWizard**-integratie is in Home Assistant ingesteld, met je HomeWizard-apparaten
+  (P1-meter, kWh-meters, watermeter, plug-in batterijen). Het dashboard gebruikt de gegevens van
+  die integratie en heeft zelf geen verbinding met de apparaten.
+- Optioneel: het **Energie-dashboard** van Home Assistant met prijzen of kosten. Dan toont het
+  dashboard je echte kosten; zonder Energie-dashboard wordt een vaste prijs gebruikt.
+
 ## Installatie via HACS (aanbevolen)
 
-1. Open HACS, kies **⋮ → Custom repositories** en voeg
-   `https://github.com/rvdlinden/HomeWizard-Dashboard` toe als type **Integration**.
-2. Zoek op **HomeWizard Dashboard**, kies **Download** en herstart Home Assistant.
-3. Ga naar **Instellingen → Apparaten & diensten → Integratie toevoegen** en kies
-   **HomeWizard Dashboard**.
+Dit dashboard staat niet in de standaardlijst van HACS. Je voegt het daarom eenmalig toe
+als *custom repository*.
 
-## Handmatige installatie
+[![Openen in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rvdlinden&repository=HomeWizard-Dashboard&category=integration)
 
-Kopieer `custom_components/hwdash` naar `/config/custom_components/hwdash`, herstart HA
-en voeg daarna de integratie toe zoals bij stap 3 hierboven.
+Met de knop hierboven kun je stap 1 t/m 3 overslaan. Liever met de hand:
+
+1. Open in Home Assistant **HACS** in de zijbalk.
+2. Kies rechtsboven **⋮ → Custom repositories**.
+3. Vul in:
+   - **Repository:** `https://github.com/rvdlinden/HomeWizard-Dashboard`
+   - **Type:** `Integration`
+
+   en kies **Add**. Sluit daarna het venster.
+4. Zoek in HACS op **HomeWizard Dashboard**, open het en kies rechtsonder **Download**.
+   Bevestig met **Download**.
+5. Herstart Home Assistant: **Instellingen → Systeem → ⏻ (rechtsboven) → Home Assistant herstarten**.
+6. Ga naar **Instellingen → Apparaten & diensten → + Integratie toevoegen**, zoek op
+   **HomeWizard Dashboard** en volg de stappen. Je kunt hier de naam, het icoon en het URL-pad
+   van het panel kiezen, of de standaardwaarden laten staan.
+7. In de zijbalk staat nu **HomeWizard**. Ververs de pagina (of herstart de Companion-app) als
+   je het nog niet ziet.
+
+De HomeWizard-apparaten worden automatisch gevonden. Onder het tandwiel rechtsboven in het
+dashboard zie je wat er gedetecteerd is. Prijzen en overige instellingen pas je aan via
+**Instellingen → Apparaten & diensten → HomeWizard Dashboard → Configureren** (zie *Opties*).
+
+### Bijwerken
+
+HACS meldt een nieuwe versie vanzelf onder **Instellingen → Updates** en in HACS zelf. Kies
+**Update**, herstart Home Assistant en ververs de pagina in je browser of de Companion-app.
+
+### Verwijderen
+
+1. **Instellingen → Apparaten & diensten → HomeWizard Dashboard → ⋮ → Verwijderen.**
+2. In HACS: open **HomeWizard Dashboard → ⋮ → Verwijderen**.
+3. Herstart Home Assistant.
+
+## Handmatige installatie (zonder HACS)
+
+1. Download de nieuwste release van
+   [github.com/rvdlinden/HomeWizard-Dashboard/releases](https://github.com/rvdlinden/HomeWizard-Dashboard/releases)
+   (*Source code (zip)*) en pak hem uit.
+2. Kopieer de map `custom_components/hwdash` naar `/config/custom_components/hwdash` op je Home
+   Assistant (bijv. met de Samba- of File editor-add-on).
+3. Herstart Home Assistant en voeg de integratie toe zoals in stap 6 hierboven.
+
+Bij een handmatige installatie werk je bij door de map `hwdash` te vervangen door die uit een
+nieuwe release en Home Assistant te herstarten.
 
 ## Opties
 
