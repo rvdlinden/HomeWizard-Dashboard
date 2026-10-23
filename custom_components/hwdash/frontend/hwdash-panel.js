@@ -3,7 +3,7 @@
  * Zelfde weergave als de HomeWizard Energy-app; alle data via de HA-sessie
  * (hass.states en hass.callWS), dus zonder tokens of losse servers.
  * ===================================================================== */
-const HWDASH_VERSION = "1.0.1";
+const HWDASH_VERSION = "1.1.0";
 const CHART_URL = new URL("./chart.umd.min.js", import.meta.url).href;
 
 function loadChart() {
@@ -76,7 +76,7 @@ class HwData {
   constructor(panel) { this.panel = panel; this.mapping = null; this.error = null; this.cache = new Map(); }
   get hass() { return this.panel._hass; }
   get cfg() { return Object.assign({ prijs_kwh: 0.40, teruglever_prijs: null, solar_counter: "auto",
-                                     battery_power_sign: 1, stroom_totaal: "auto", jaar_start: [1, 1], overrides: {} }, this.panel._panel?.config || {}); }
+                                     battery_power_sign: 1, stroom_totaal: "auto", jaar_start: [1, 1], thema: "light", overrides: {} }, this.panel._panel?.config || {}); }
 
   async init() {
     try { this.mapping = await this.discover(); this.error = null; this.cache.clear(); }
@@ -371,9 +371,13 @@ class HwData {
 
 /* ------------------------- weergave ------------------------------- */
 // kleuren zoals in de HomeWizard-app: paars = afname/verbruik/laden, groen = opwek/teruglevering/ontladen
-const COL = { zelf: "#3db8ff", net: "#a020f0", terug: "#1ed97a", zon: "#1ed97a", laden: "#a020f0",
-              ontladen: "#1ed97a", wp: "#a020f0", water: "#3db8ff", soc: "#f2f2f2", v2: "#8f3dff" };
-const VCOL = [COL.net, COL.v2, COL.zelf];              // spanning L1, L2, L3
+const COL_LIGHT = { zelf: "#3db8ff", net: "#a020f0", terug: "#1ed97a", zon: "#1ed97a", laden: "#a020f0",
+                    ontladen: "#1ed97a", wp: "#a020f0", water: "#3db8ff", soc: "#f2f2f2", v2: "#8f3dff" };
+// dark theme: paars en groen een tintje donkerder, de gloed doet de rest
+const COL_DARK = { ...COL_LIGHT, net: "#8c16d8", laden: "#8c16d8", wp: "#8c16d8", v2: "#7a2fe0",
+                   terug: "#17bd69", zon: "#17bd69", ontladen: "#17bd69" };
+const COL = { ...COL_LIGHT };                           // actief palet; wisselt mee met het thema
+const vcol = i => [COL.net, COL.v2, COL.zelf][i % 3];   // spanning L1, L2, L3
 const VLIMIT = 253;                                     // bovengrens netspanning (230 V + 10%)
 
 const STYLE = `
@@ -485,6 +489,28 @@ ha-menu-button{--mdc-icon-button-size:40px;color:var(--txt)}
   .dleg,#dro{margin-left:8px}
 }
 
+/* dark theme: geen tegels, alles loopt in elkaar over; gloed in de eigen kleur */
+:host(.dark){--bg:#050506;--card:transparent;--card2:#1c1c21;--mut:#77777f}
+:host(.dark) .hero.day,:host(.dark) .hero.night{--sky1:#050507;--sky2:#0a0912;--sky3:#130e22;--hill1:#120f1f;--hill2:#0d0b17;
+  --grd:#0a0912;--grd2:#050506;--cloud:#ffffff;--cloudo:.035;--tree1:#0e5f3c;--tree2:#127548;--inner:#d8c88f;--win:#2a2f5e;
+  --lab:#8d8d99;--wire:#07060c}
+:host(.dark) .hero .stars{opacity:.55}
+:host(.dark) .hs .v{text-shadow:0 0 20px #ffffff3d}
+:host(.dark) .fl{stroke-width:5;filter:drop-shadow(0 0 4px currentColor) drop-shadow(0 0 12px currentColor)}
+:host(.dark) .cards{gap:0;padding:4px 0 14px}
+:host(.dark) .card{border-radius:0;padding:22px 12px 12px;position:relative}
+:host(.dark) .card::before{content:"";position:absolute;left:28px;right:28px;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,#ffffff1f 30%,#ffffff1f 70%,transparent)}
+:host(.dark) .cv{overflow:visible}
+:host(.dark) .cv span{display:inline-block;filter:drop-shadow(0 0 7px color-mix(in srgb,currentColor 75%,transparent))}
+:host(.dark) .cr svg.ic{filter:drop-shadow(0 0 6px #ffffff70)}
+:host(.dark) .ro{color:#7d7d86}
+:host(.dark) #pnav{background:#0a0a0cf0;box-shadow:0 0 0 1px #ffffff14,0 10px 30px #000}
+:host(.dark) .tabs{background:#000}
+:host(.dark) .tabs button.on{background:#17171b;box-shadow:inset 0 -2px 0 #8c16d8,0 0 16px #8c16d840}
+:host(.dark) #detail{background:#050506}
+#theme .sun{display:none} :host(.dark) #theme .sun{display:inline} :host(.dark) #theme .moon{display:none}
+
 /* instellingen */
 #settings{position:absolute;inset:0;background:var(--bg);overflow:auto;padding:12px 16px;z-index:10}
 #settings .top{padding:0 0 8px}
@@ -510,6 +536,7 @@ const TEMPLATE = `
     <div class="top">
       <div class="l"><span id="menu"></span><h1>HomeWizard</h1></div>
       <div class="r"><span class="dot" id="conn"></span>
+        <button class="iconbtn" id="theme" aria-label="Licht of donker thema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path class="moon" d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/><g class="sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg></button>
         <button class="iconbtn" id="gear" aria-label="Instellingen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M10.3 2.8h3.4l.6 2.6 1.6.9 2.5-.9 1.7 2.9-2 1.8v1.8l2 1.8-1.7 2.9-2.5-.9-1.6.9-.6 2.6h-3.4l-.6-2.6-1.6-.9-2.5.9-1.7-2.9 2-1.8v-1.8l-2-1.8 1.7-2.9 2.5.9 1.6-.9z"/></svg></button></div>
     </div>
     <div id="htitle"></div>
@@ -646,8 +673,8 @@ const socDs = data => ({label:"Laadniveau",type:"line",data,borderColor:COL.soc,
 // kaart met de spanning per fase; lijnen niet gestapeld, as rond 230 V
 function voltCard(heads, sets){
   return {id:"volt", name:"Overvoltage", icon:IC.stroom, flat:true, limit:VLIMIT, yMin:220, yMax:260,
-    head:many(heads.map((v,i)=>[fV(v),VCOL[i%3]]),"V"),
-    datasets:sets.map((d,i)=>ds(d.name,d.data,VCOL[i%3],{type:"line",unit:"V",stack:"v"+i,
+    head:many(heads.map((v,i)=>[fV(v),vcol(i)]),"V"),
+    datasets:sets.map((d,i)=>ds(d.name,d.data,vcol(i),{type:"line",unit:"V",stack:"v"+i,
       fill:i===0?"start":false, backgroundColor:i===0?grad(COL.net,"55","10"):"transparent"}))};
 }
 // gestippelde grenslijn (overspanning)
@@ -665,6 +692,11 @@ const valueLabels = { id:"vlabels", afterDatasetsDraw(c){
     meta.data.forEach((el,j)=>{ const v=d.data[j]; if(v==null||v===0) return; g.fillText(fShort(v), el.x, el.y-4); }); });
   g.restore();
 }};
+// dark theme: lijnen en staven gloeien in hun eigen kleur (laadniveau-lijn niet)
+const glow = { id:"glow",
+  beforeDatasetDraw(c,a){ const d=c.data.datasets[a.index]; if(d.yAxisID==="y2") return; c.ctx.save();
+    c.ctx.shadowColor=(d._col||"#ffffff")+"dd"; c.ctx.shadowBlur=d.type==="bar"?18:16; },
+  afterDatasetDraw(c,a){ if(c.data.datasets[a.index].yAxisID!=="y2") c.ctx.restore(); } };
 const crosshair = { id:"cross", afterDatasetsDraw(c){
   const a=c.tooltip?.getActiveElements?.(); if(!a||!a.length) return;
   const x=a[0].element.x, {top,bottom}=c.chartArea, g=c.ctx;
@@ -878,7 +910,8 @@ function mountDashboard(host, root, data){
   }
 
   function baseOptions(labels, isDay, y2, ro, detail){
-    const tick = {color:"#8a8a90", font:{size:detail?12:11}};
+    const dark = host.classList.contains("dark");
+    const tick = {color:dark?"#62626b":"#8a8a90", font:{size:detail?12:11}};
     return {
       animation:false, responsive:true, maintainAspectRatio:false,
       interaction:{mode:"index", intersect:false},
@@ -888,7 +921,7 @@ function mountDashboard(host, root, data){
             ticks:{ ...tick, maxRotation:0, autoSkip:!isDay,
               callback(v,i){ const l=this.chart.data.labels[i]; if(!isDay) return l;
                 return /^(02|07|12|17|22):00$/.test(l)?l:null; } } },
-        y:{ stacked:true, position:"right", grid:{color:"#2c2c30"}, border:{display:false},
+        y:{ stacked:true, position:"right", grid:{color:dark?"#16161a":"#2c2c30"}, border:{display:false},
             ticks:{ ...tick, maxTicksLimit:5, callback:v=>String(+(+v).toFixed(2)) } },
         ...(y2?{ y2:{ position:"left", min:0, max:100, grid:{display:false}, border:{display:false},
             ticks:{ ...tick, stepSize:100, callback:v=>v+" %" } } }:{})
@@ -935,7 +968,8 @@ function mountDashboard(host, root, data){
     // detail krijgt eigen kopieën van de datasets: Chart.js koppelt een dataset aan één grafiek
     const datasets = detail ? c.datasets.map(d=>({...d})) : c.datasets;
     return {type, data:{labels, datasets}, options:opts,
-      plugins:[crosshair, ...(c.limit?[limitLine(c.limit)]:[]), ...(detail?[valueLabels]:[])]};
+      plugins:[crosshair, ...(c.limit?[limitLine(c.limit)]:[]), ...(detail?[valueLabels]:[]),
+               ...(host.classList.contains("dark")?[glow]:[])]};
   }
 
   /* detailscherm: per kaart, liggend, met alle waarden */
@@ -1020,7 +1054,7 @@ function mountDashboard(host, root, data){
   function pollNow(){
     st.now = data.now();
     if(st.now.ts){ st.live.push(st.now); if(st.live.length>300) st.live.shift(); }
-    renderConn(); renderHouse();
+    renderConn(); applyTheme(); renderHouse();      // applyTheme: volgt HA als die van licht naar donker wisselt
     if(st.period==="nu") drawLive();
   }
   async function pollDay(){
@@ -1055,6 +1089,25 @@ function mountDashboard(host, root, data){
   $$(".tabs button").forEach(b=>b.onclick=()=>{ st.period=b.dataset.p; st.anchor=today(); loadPeriod(); });
   $$(".nprev").forEach(b=>b.onclick=()=>shift(-1)); $$(".nnext").forEach(b=>b.onclick=()=>shift(1));
   $$(".nlast").forEach(b=>b.onclick=()=>{ st.anchor=today(); loadPeriod(); });
+
+  /* thema: de knop rechtsboven onthoudt de keuze per apparaat; anders geldt de optie uit Configureren
+     (licht, donker of volg Home Assistant) */
+  const storedTheme = () => { try{ return localStorage.getItem("hwdash-theme"); }catch(e){ return null; } };
+  const wantDark = () => { const t = storedTheme() || data.cfg.thema;
+    return t==="dark" || (t==="auto" && !!data.hass?.themes?.darkMode); };
+  function applyTheme(){
+    const dark = wantDark();
+    if(dark===host.classList.contains("dark") && st.themed) return;
+    st.themed = true; host.classList.toggle("dark", dark);
+    Object.assign(COL, dark ? COL_DARK : COL_LIGHT);
+    destroyCharts(); st.sig=""; st.dsig=""; st.dchart?.destroy(); st.dchart=null;
+    redraw(); renderHouse();
+  }
+  $("#theme").onclick = () => {
+    try{ localStorage.setItem("hwdash-theme", host.classList.contains("dark") ? "light" : "dark"); }catch(e){}
+    applyTheme();
+  };
+  applyTheme();
 
   /* start */
   const onVis = () => { if(!document.hidden){ pollNow(); pollDay(); } };

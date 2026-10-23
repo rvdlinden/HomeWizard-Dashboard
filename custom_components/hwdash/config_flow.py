@@ -31,6 +31,7 @@ from .const import (
     CONF_OVERRIDES,
     CONF_PRICE,
     CONF_SOLAR_COUNTER,
+    CONF_THEME,
     CONF_TITLE,
     CONF_URL_PATH,
     CONF_YEAR_DAY,
@@ -50,6 +51,9 @@ def _panel_schema(d: dict[str, Any]) -> dict:
         vol.Required(CONF_ICON, default=d[CONF_ICON]): IconSelector(),
         vol.Required(CONF_URL_PATH, default=d[CONF_URL_PATH]): TextSelector(),
         vol.Required(CONF_ADMIN_ONLY, default=d[CONF_ADMIN_ONLY]): BooleanSelector(),
+        vol.Required(CONF_THEME, default=d[CONF_THEME]): SelectSelector(
+            SelectSelectorConfig(options=["light", "dark", "auto"], translation_key="thema",
+                                 mode=SelectSelectorMode.DROPDOWN)),
     }
 
 
