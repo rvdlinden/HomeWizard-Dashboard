@@ -9,7 +9,8 @@
           "sidebar_title": "Sidebar title",
           "sidebar_icon": "Icon",
           "url_path": "URL path (e.g. homewizard)",
-          "require_admin": "Visible to administrators only"
+          "require_admin": "Visible to administrators only",
+          "thema": "Theme"
         }
       }
     },
@@ -30,6 +31,7 @@
           "sidebar_icon": "Icon",
           "url_path": "URL path (e.g. homewizard)",
           "require_admin": "Visible to administrators only",
+          "thema": "Theme",
           "prijs_kwh": "Fixed price (only used without cost statistics in the Energy dashboard)",
           "saldering": "Net metering (feed-in at the same price)",
           "teruglever_prijs": "Feed-in price without net metering",
@@ -44,7 +46,8 @@
           "prijs_kwh": "Costs preferably come from the HA Energy dashboard. This price is the fallback.",
           "overrides": "E.g. {\"solar\": [...]}. Leave empty for automatic detection.",
           "stroom_totaal": "Automatic: net metering until end of 2026, import and export separately from 1 Jan 2027.",
-          "jaar_start_dag": "E.g. 1 and 4 for a contract year from 1 April; the year view then shows 2026/2027."
+          "jaar_start_dag": "E.g. 1 and 4 for a contract year from 1 April; the year view then shows 2026/2027.",
+          "thema": "Default for everyone. The sun/moon button in the panel overrides it per device."
         }
       }
     },
@@ -72,6 +75,13 @@
         "auto": "Automatic (separate from 2027)",
         "netto": "Always net (net metering)",
         "apart": "Import and export separately"
+      }
+    },
+    "thema": {
+      "options": {
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Follow Home Assistant"
       }
     }
   }

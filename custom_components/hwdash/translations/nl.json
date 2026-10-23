@@ -9,7 +9,8 @@
           "sidebar_title": "Naam in de zijbalk",
           "sidebar_icon": "Icoon",
           "url_path": "URL-pad (bijv. homewizard)",
-          "require_admin": "Alleen zichtbaar voor beheerders"
+          "require_admin": "Alleen zichtbaar voor beheerders",
+          "thema": "Thema"
         }
       }
     },
@@ -30,6 +31,7 @@
           "sidebar_icon": "Icoon",
           "url_path": "URL-pad (bijv. homewizard)",
           "require_admin": "Alleen zichtbaar voor beheerders",
+          "thema": "Thema",
           "prijs_kwh": "Vaste stroomprijs (alleen zonder kostenstatistiek in het Energie-dashboard)",
           "saldering": "Saldering (teruglevering tegen dezelfde prijs)",
           "teruglever_prijs": "Terugleverprijs zonder saldering",
@@ -44,7 +46,8 @@
           "prijs_kwh": "Kosten komen bij voorkeur uit het HA Energie-dashboard (bijv. een dynamisch contract). Deze prijs is de terugval.",
           "overrides": "Bijv. {\"solar\": [{\"name\": \"Zon\", \"energy\": \"sensor.x\", \"power\": \"sensor.y\"}]}. Leeg laten voor automatische detectie.",
           "stroom_totaal": "Automatisch: netto (saldering) t/m 2026, afname en teruglevering apart vanaf 1 jan 2027.",
-          "jaar_start_dag": "Bijv. 1 en 4 voor een contractjaar vanaf 1 april (jaarafrekening); het jaaroverzicht toont dan 2026/2027."
+          "jaar_start_dag": "Bijv. 1 en 4 voor een contractjaar vanaf 1 april (jaarafrekening); het jaaroverzicht toont dan 2026/2027.",
+          "thema": "Standaard voor iedereen. De zon/maan-knop in het panel overschrijft dit per apparaat."
         }
       }
     },
@@ -72,6 +75,13 @@
         "auto": "Automatisch (apart vanaf 2027)",
         "netto": "Altijd netto (saldering)",
         "apart": "Afname en teruglevering apart"
+      }
+    },
+    "thema": {
+      "options": {
+        "light": "Licht",
+        "dark": "Donker",
+        "auto": "Volg Home Assistant"
       }
     }
   }

@@ -16,6 +16,9 @@ De data komt uit de HomeWizard-integratie die je al in HA hebt draaien.
 - **Detailscherm per grafiek:** tik op het icoon van een kaart. Schermvullend met legenda, de
   geselecteerde staaf met alle waarden en de waarde boven elke staaf; kantel je telefoon voor een
   liggende weergave. De terug-pijl (of de terugknop) brengt je terug.
+- **Licht en donker thema:** het donkere thema heeft geen tegels, laat de grafieken in elkaar
+  overlopen en laat lijnen, staven en waarden gloeien in hun eigen kleur. Wisselen kan met de
+  zon/maan-knop rechtsboven of via de optie *Thema*.
 - **Zwevende periodekiezer:** Nu, Dag, Week, Maand en Jaar met datumnavigatie; geldt voor alle
   kaarten tegelijk. Aanraakcursor met waarden per grafiek. Hetzelfde kleurgebruik als de app
   (paars = afname/laden, groen = opwek/teruglevering/ontladen, blauw = zelfvoorzienend/water).
@@ -107,6 +110,7 @@ Via **HomeWizard Dashboard → Configureren** stel je het volgende in:
 |---|---|
 | Naam, icoon, URL-pad | Hoe en waar het panel in de zijbalk staat (standaard `/homewizard`) |
 | Alleen beheerders | Verbergt het panel voor gewone gebruikers |
+| Thema | `Licht`, `Donker` of `Volg Home Assistant`. De zon/maan-knop rechtsboven in het panel overschrijft dit per apparaat |
 | Vaste stroomprijs | Wordt alleen gebruikt als het Energie-dashboard geen kostenstatistiek heeft |
 | Saldering / terugleverprijs | Hoe teruglevering verrekend wordt bij een vaste prijs |
 | Weergave Stroom totaal | `Automatisch` (netto t/m 2026, afname en teruglevering apart vanaf 1 jan 2027), `Altijd netto` of `Apart` |

@@ -16,6 +16,7 @@ CONF_BATTERY_SIGN = "battery_power_sign"
 CONF_GRID_VIEW = "stroom_totaal"
 CONF_YEAR_DAY = "jaar_start_dag"
 CONF_YEAR_MONTH = "jaar_start_maand"
+CONF_THEME = "thema"
 CONF_OVERRIDES = "overrides"
 
 DEFAULTS = {
@@ -31,5 +32,6 @@ DEFAULTS = {
     CONF_GRID_VIEW: "auto",
     CONF_YEAR_DAY: 1,
     CONF_YEAR_MONTH: 1,
+    CONF_THEME: "light",
     CONF_OVERRIDES: {},
 }

@@ -26,6 +26,7 @@ from .const import (
     CONF_OVERRIDES,
     CONF_PRICE,
     CONF_SOLAR_COUNTER,
+    CONF_THEME,
     CONF_TITLE,
     CONF_URL_PATH,
     CONF_YEAR_DAY,
@@ -70,6 +71,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "battery_power_sign": int(_opt(entry, CONF_BATTERY_SIGN)),
         "stroom_totaal": _opt(entry, CONF_GRID_VIEW),
         "jaar_start": [int(_opt(entry, CONF_YEAR_DAY)), int(_opt(entry, CONF_YEAR_MONTH))],
+        "thema": _opt(entry, CONF_THEME),
         "overrides": _opt(entry, CONF_OVERRIDES) or {},
     }
     url_path = _opt(entry, CONF_URL_PATH)
