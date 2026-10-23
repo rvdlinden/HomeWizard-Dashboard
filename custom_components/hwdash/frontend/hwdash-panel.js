@@ -3,7 +3,7 @@
  * Zelfde weergave als de HomeWizard Energy-app; alle data via de HA-sessie
  * (hass.states en hass.callWS), dus zonder tokens of losse servers.
  * ===================================================================== */
-const HWDASH_VERSION = "1.1.0";
+const HWDASH_VERSION = "1.1.1";
 const CHART_URL = new URL("./chart.umd.min.js", import.meta.url).href;
 
 function loadChart() {
@@ -668,8 +668,9 @@ function ds(label, data, col, o={}){
     pointRadius:0, pointHitRadius:6, borderWidth:2, tension:.25, fill:line?"origin":false,
     stack:"a", spanGaps:false, unit:o.unit||"", _col:col}, bar, o);
 }
+// laadniveau: witte lijn op een eigen (onzichtbare) 0-100%-as; order -1 = als laatste getekend, dus bovenop
 const socDs = data => ({label:"Laadniveau",type:"line",data,borderColor:COL.soc,borderWidth:1.5,pointRadius:0,
-  tension:.3,fill:false,yAxisID:"y2",unit:"%",_col:COL.soc});
+  tension:.3,fill:false,yAxisID:"y2",unit:"%",_col:COL.soc,order:-1});
 // kaart met de spanning per fase; lijnen niet gestapeld, as rond 230 V
 function voltCard(heads, sets){
   return {id:"volt", name:"Overvoltage", icon:IC.stroom, flat:true, limit:VLIMIT, yMin:220, yMax:260,
@@ -860,7 +861,7 @@ function mountDashboard(host, root, data){
       head:one(f1(T.solar),"kWh",COL.zon), datasets:[ ds("Opwek",cv(s.solar),COL.zon,o()) ]});
     if(has("batterij")){
       const y2 = s.soc.some(v=>v!=null);
-      C.push({id:"batterij", name:"Batterij", icon:IC.batterij, y2,
+      C.push({id:"batterij", name:"Batterij", icon:IC.batterij, y2:y2&&isDay,
         head:many([[f1(T.chg),COL.laden],[f1(T.dis),COL.ontladen]],"kWh"),
         datasets:[ ds("Laden",cv(s.chg),COL.laden,o()), neg(s.dis,"Ontladen",COL.ontladen) ]
           .concat(y2&&isDay?[socDs(s.soc)]:[]) });      // laadniveau-lijn alleen bij Dag, zoals de app
@@ -923,8 +924,8 @@ function mountDashboard(host, root, data){
                 return /^(02|07|12|17|22):00$/.test(l)?l:null; } } },
         y:{ stacked:true, position:"right", grid:{color:dark?"#16161a":"#2c2c30"}, border:{display:false},
             ticks:{ ...tick, maxTicksLimit:5, callback:v=>String(+(+v).toFixed(2)) } },
-        ...(y2?{ y2:{ position:"left", min:0, max:100, grid:{display:false}, border:{display:false},
-            ticks:{ ...tick, stepSize:100, callback:v=>v+" %" } } }:{})
+        // alleen een schaal rechts, zoals de andere grafieken: de 0-100%-as van het laadniveau is onzichtbaar
+        ...(y2?{ y2:{ display:false, min:0, max:100 } }:{})
       }
     };
   }
