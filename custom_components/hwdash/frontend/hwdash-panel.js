@@ -3,7 +3,7 @@
  * Zelfde weergave als de HomeWizard Energy-app; alle data via de HA-sessie
  * (hass.states en hass.callWS), dus zonder tokens of losse servers.
  * ===================================================================== */
-const HWDASH_VERSION = "1.1.1";
+const HWDASH_VERSION = "1.1.2";
 const CHART_URL = new URL("./chart.umd.min.js", import.meta.url).href;
 
 function loadChart() {
@@ -52,14 +52,16 @@ function regroup(res, key, label) {
   return { ...res, labels: groups.map(g => label(g.w)), ts: groups.map(g => res.ts[g.idx[0]]), series: out };
 }
 const perWeek = res => regroup(res, isoWeek, String);
-// Jaar: 12 staven vanaf de startdatum, elk van bijv. 15 april t/m 14 mei.
-function perContractMonth(res, start, jaarStart) {
-  const dg = (jaarStart || [1, 1])[0];
-  const b = Array.from({ length: 12 }, (_, k) => { const y = start.getFullYear(), m = start.getMonth() + k;
-    return new Date(y, m, Math.min(dg, new Date(y, m + 1, 0).getDate())).getTime(); });
+// Jaar: gewone kalendermaanden binnen het afrekenjaar. Alleen de afrekenmaand is gedeeld: bij start 19 mei is de
+// eerste staaf 19-31 mei en de laatste 1-18 mei van het jaar erna (13 staven); bij start op de 1e blijven het er 12.
+function perContractMonth(res, start, end) {
+  const b = [start.getTime()];
+  for (let t = new Date(start.getFullYear(), start.getMonth() + 1, 1); t < end; t = new Date(t.getFullYear(), t.getMonth() + 1, 1))
+    b.push(t.getTime());
   const MN = ["j", "f", "m", "a", "m", "j", "j", "a", "s", "o", "n", "d"];
-  return regroup(res, ts => { let k = 0; while (k < 11 && ts >= b[k + 1]) k++; return k; },
-                 k => MN[new Date(b[k]).getMonth()]);
+  const out = regroup(res, ts => { let k = 0; while (k < b.length - 1 && ts >= b[k + 1]) k++; return k; },
+                      k => MN[new Date(b[k]).getMonth()]);
+  return { ...out, ends: b.slice(1).concat(end.getTime()) };   // einde (exclusief) per staaf, voor de periode in de readout
 }
 const TARIFF = /(_t[1-4]\b|_t[1-4]_|tariff|tarief)/;
 const PHASE = /(_l[123]\b|_l[123]_|phase|fase)/;
@@ -314,7 +316,7 @@ class HwData {
                 cost, verbruik, zelf, wp: wps,
                 volt: volt.map(v => ({ name: v.name, data: v.data })) }, totals: T, cost_source: costSrc };
     if (view === "month") res = perWeek(res);          // maand: staven per weeknummer, zoals de app
-    if (view === "year") res = perContractMonth(res, start, this.cfg.jaar_start);
+    if (view === "year") res = perContractMonth(res, start, end);
     this.cache.set(key, { t: now, res });
     if (this.cache.size > 200) this.cache.clear();
     return res;
@@ -929,6 +931,12 @@ function mountDashboard(host, root, data){
       }
     };
   }
+  // jaar: hele maand → "juni 2026"; gedeelde afrekenmaand → "19 – 31 mei 2026"
+  function yearLabel(dt, endTs){
+    const e = endTs ? new Date(endTs - 864e5/2) : null, last = new Date(dt.getFullYear(), dt.getMonth()+1, 0).getDate();
+    if(!e || (dt.getDate()===1 && e.getDate()===last)) return `${MAANDEN_L[dt.getMonth()]} ${dt.getFullYear()}`;
+    return `${dt.getDate()} – ${e.getDate()} ${MAANDEN[dt.getMonth()]} ${dt.getFullYear()}`;
+  }
   function readout(ctx, ro, detail){
     const t=ctx.tooltip; if(!t||!t.dataPoints||!t.opacity){ if(!detail) ro.innerHTML=""; return; }
     const p=t.dataPoints, i=p[0].dataIndex, d=st.data;
@@ -937,7 +945,7 @@ function mountDashboard(host, root, data){
     else {
       const dt=new Date(d.ts[i]);
       when = d.step!=null ? `${DAGEN[dt.getDay()]} ${dt.getDate()} ${MAANDEN[dt.getMonth()]}. ${d.labels[i]}`
-        : d.view==="year" ? `${MAANDEN_L[dt.getMonth()]} ${dt.getFullYear()}` : d.view==="month" ? `Week ${d.labels[i]}`
+        : d.view==="year" ? yearLabel(dt, d.ends?.[i]) : d.view==="month" ? `Week ${d.labels[i]}`
         : `${DAGEN[dt.getDay()]} ${dt.getDate()} ${MAANDEN[dt.getMonth()]}`;
     }
     const vals = p.filter(x=>x.raw!=null).map(x=>{

@@ -114,7 +114,7 @@ Via **HomeWizard Dashboard → Configureren** stel je het volgende in:
 | Vaste stroomprijs | Wordt alleen gebruikt als het Energie-dashboard geen kostenstatistiek heeft |
 | Saldering / terugleverprijs | Hoe teruglevering verrekend wordt bij een vaste prijs |
 | Weergave Stroom totaal | `Automatisch` (netto t/m 2026, afname en teruglevering apart vanaf 1 jan 2027), `Altijd netto` of `Apart` |
-| Startdag en -maand jaaroverzicht | Laat het jaar beginnen op je afrekendatum, bijv. 1 en 4 voor 1 april t/m 31 maart (titel 2026/2027) |
+| Startdag en -maand jaaroverzicht | Laat het jaar beginnen op je afrekendatum (titel 2026/2027). Het jaaroverzicht toont gewone kalendermaanden; alleen de afrekenmaand is gedeeld. Bijv. start 15 april: 15–30 april, mei t/m maart, 1–14 april |
 | Opwekteller | Welke teller van de zon-kWh-meter de opwek is: `auto`, `import` of `export` |
 | Teken batterijvermogen | Zet dit om als laden en ontladen in het panel verwisseld zijn |
 | Overrides | Koppel sensoren handmatig als de detectie iets mist |
