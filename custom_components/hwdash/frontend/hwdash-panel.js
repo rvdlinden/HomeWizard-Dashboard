@@ -3,7 +3,7 @@
  * Zelfde weergave als de HomeWizard Energy-app; alle data via de HA-sessie
  * (hass.states en hass.callWS), dus zonder tokens of losse servers.
  * ===================================================================== */
-const HWDASH_VERSION = "1.1.2";
+const HWDASH_VERSION = "1.2.0";
 const CHART_URL = new URL("./chart.umd.min.js", import.meta.url).href;
 
 function loadChart() {
@@ -697,9 +697,73 @@ const valueLabels = { id:"vlabels", afterDatasetsDraw(c){
 }};
 // dark theme: lijnen en staven gloeien in hun eigen kleur (laadniveau-lijn niet)
 const glow = { id:"glow",
-  beforeDatasetDraw(c,a){ const d=c.data.datasets[a.index]; if(d.yAxisID==="y2") return; c.ctx.save();
-    c.ctx.shadowColor=(d._col||"#ffffff")+"dd"; c.ctx.shadowBlur=d.type==="bar"?18:16; },
-  afterDatasetDraw(c,a){ if(c.data.datasets[a.index].yAxisID!=="y2") c.ctx.restore(); } };
+  beforeDatasetDraw(c,a){ const d=c.data.datasets[a.index]; if(d.yAxisID==="y2" || d._metal) return; c.ctx.save();
+    c.ctx.shadowColor=(d._col||"#ffffff")+"99"; c.ctx.shadowBlur=d.type==="bar"?18:8; },
+  afterDatasetDraw(c,a){ const d=c.data.datasets[a.index]; if(d.yAxisID!=="y2" && !d._metal) c.ctx.restore(); } };
+// ---- dark theme: staven als afgerond gunmetal, belicht door een lamp in de eigen kleur; lijnen met heldere kern
+const hexA = (hex, a) => { const n=parseInt(hex.slice(1),16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; };
+// kleur mengen richting wit (licht) of zwart (schaduw)
+const mixC = (hex, to, f) => { const n=parseInt(hex.slice(1),16), t=to==="w"?255:0;
+  return "#"+[n>>16&255,n>>8&255,n&255].map(v=>Math.round(v+(t-v)*f).toString(16).padStart(2,"0")).join(""); };
+// mengen van twee kleuren
+const mix2 = (a, b, t) => { const A=parseInt(a.slice(1),16), B=parseInt(b.slice(1),16);
+  return "#"+[16,8,0].map(sh=>Math.round((A>>sh&255)+((B>>sh&255)-(A>>sh&255))*t).toString(16).padStart(2,"0")).join(""); };
+const STEEL = "#4f555e";                                   // gunmetal
+// massief, afgerond gunmetal blok; diepte komt uit de belichting: bevel boven, wit licht links, gekleurde lamp rechts
+function drawMetal(g, x, top, base, w, col){
+  const h = base-top; if(h < 0.5) return;
+  const L=x-w/2, R=x+w/2, rr=Math.min(4.5, w*.32, h/2), st = t => mix2(STEEL, col, t);
+  const shape = () => { g.beginPath(); g.roundRect(L, top, w, h, [rr, rr, Math.min(2,rr), Math.min(2,rr)]); };
+  // vloer: gekleurde lichtvlek + spiegeling
+  g.save(); const sp=g.createRadialGradient(x+w*.15, base+1.5, 0, x+w*.15, base+1.5, w);
+  sp.addColorStop(0, hexA(col,.18)); sp.addColorStop(1, hexA(col,0)); g.fillStyle=sp;
+  g.beginPath(); g.ellipse(x+w*.15, base+1.5, w, 3.5, 0, 0, Math.PI*2); g.fill(); g.restore();
+  const rh = Math.min(h*.3, 10);
+  g.save(); g.beginPath(); g.roundRect(L, base, w, rh, [2, 2, rr, rr]); g.clip();
+  const rg=g.createLinearGradient(0, base, 0, base+rh); rg.addColorStop(0, hexA(mixC(st(.25),"w",.2),.14)); rg.addColorStop(1, hexA(STEEL,0));
+  g.fillStyle=rg; g.fillRect(L, base, w, rh); g.restore();
+  // lichaam: staalglans van links naar rechts
+  g.save(); shape();
+  const fg=g.createLinearGradient(L,0,R,0);
+  fg.addColorStop(0, mixC(st(.04),"w",.12)); fg.addColorStop(.12, mixC(st(.05),"w",.32)); fg.addColorStop(.32, st(.08));
+  fg.addColorStop(.58, mixC(st(.12),"b",.38)); fg.addColorStop(.82, mixC(st(.4),"w",.05)); fg.addColorStop(1, mixC(st(.6),"w",.18));
+  g.fillStyle=fg; g.fill(); g.clip();
+  // gekleurd lamplicht op de rechterkant
+  g.globalCompositeOperation="lighter";
+  const lg=g.createLinearGradient(R,0,x-w*.15,0); lg.addColorStop(0, hexA(col,.5)); lg.addColorStop(1, hexA(col,0));
+  g.fillStyle=lg; g.fillRect(L, top, w, h);
+  g.globalCompositeOperation="source-over";
+  // licht van boven, schaduw onder
+  const vg=g.createLinearGradient(0,top,0,base); vg.addColorStop(0,"rgba(255,255,255,.10)"); vg.addColorStop(.45,"rgba(255,255,255,0)");
+  vg.addColorStop(1,"rgba(0,0,0,.45)"); g.fillStyle=vg; g.fillRect(L,top,w,h);
+  // borstelstreepjes
+  for(let i=0;i<w;i+=1.5){ g.strokeStyle=`rgba(255,255,255,${(Math.sin(i*12.9898)*43758.5453%1+1)%1*.07})`;
+    g.lineWidth=.6; g.beginPath(); g.moveTo(L+i, top); g.lineTo(L+i, base); g.stroke(); }
+  // bevel aan de bovenkant: lichte band die over de ronde hoeken loopt
+  const bv=g.createLinearGradient(0,top,0,top+rr+3); bv.addColorStop(0, hexA(mixC(st(.35),"w",.55),.9)); bv.addColorStop(1,"rgba(255,255,255,0)");
+  g.fillStyle=bv; g.fillRect(L, top, w, rr+3);
+  g.restore();
+  // randen: wit licht links en boven, gekleurde lamp rechts
+  g.save(); shape(); g.clip(); g.lineWidth=1.2;
+  g.strokeStyle="rgba(255,255,255,.35)"; g.beginPath(); g.moveTo(L+.6, base); g.lineTo(L+.6, top+rr); g.arcTo(L+.6, top+.6, L+rr, top+.6, rr); g.lineTo(R-rr, top+.6); g.stroke();
+  g.shadowColor=hexA(col,.9); g.shadowBlur=6; g.strokeStyle=mixC(col,"w",.35);
+  g.beginPath(); g.moveTo(R-rr, top+.6); g.arcTo(R-.6, top+.6, R-.6, top+rr, rr); g.lineTo(R-.6, base); g.stroke();
+  g.restore();
+}
+const metal = { id:"metal", afterDatasetsDraw(c){
+  const g=c.ctx;
+  if(c.data.datasets.some(d=>d._metal)){ const a=c.chartArea, y0=c.scales.y.getPixelForValue(0);
+    const fg=g.createLinearGradient(0,y0,0,y0+14); fg.addColorStop(0,"rgba(255,255,255,.04)"); fg.addColorStop(1,"rgba(255,255,255,0)");
+    g.fillStyle=fg; g.fillRect(a.left, y0, a.right-a.left, 14); }
+  c.data.datasets.forEach((d,i)=>{ if(d.type!=="bar" || !d._metal) return; const meta=c.getDatasetMeta(i); if(meta.hidden) return;
+    meta.data.forEach((el,j)=>{ if(d.data[j]==null || d.data[j]===0) return;
+      drawMetal(g, el.x, Math.min(el.y,el.base), Math.max(el.y,el.base), el.width, d._col); }); });
+}};
+// vlak onder een lijn: fel ver van de nullijn, vervagend naar de nullijn toe (ook voor teruglevering onder nul)
+function metalFill(col){ return ctx=>{ const {chart}=ctx, a=chart.chartArea, sc=chart.scales.y; if(!a||!sc) return hexA(col,.3);
+  const neg=(ctx.dataset.data||[]).some(v=>v<0), y0=Math.min(a.bottom,Math.max(a.top,sc.getPixelForValue(0)));
+  const g=chart.ctx.createLinearGradient(0, neg?a.bottom:a.top, 0, y0);
+  g.addColorStop(0,hexA(col,.75)); g.addColorStop(.5,hexA(col,.28)); g.addColorStop(1,hexA(col,.04)); return g; }; }
 const crosshair = { id:"cross", afterDatasetsDraw(c){
   const a=c.tooltip?.getActiveElements?.(); if(!a||!a.length) return;
   const x=a[0].element.x, {top,bottom}=c.chartArea, g=c.ctx;
@@ -915,13 +979,14 @@ function mountDashboard(host, root, data){
   function baseOptions(labels, isDay, y2, ro, detail){
     const dark = host.classList.contains("dark");
     const tick = {color:dark?"#62626b":"#8a8a90", font:{size:detail?12:11}};
+    const xpad = dark ? 12 : 3;                 // ruimte onder de nullijn voor de reflectie van de metalen staven
     return {
       animation:false, responsive:true, maintainAspectRatio:false,
       interaction:{mode:"index", intersect:false},
       plugins:{ legend:{display:false}, tooltip:{enabled:false, external:ctx=>readout(ctx, ro, detail)} },
       scales:{
         x:{ stacked:true, grid:{display:false}, border:{display:false},
-            ticks:{ ...tick, maxRotation:0, autoSkip:!isDay,
+            ticks:{ ...tick, padding:xpad, maxRotation:0, autoSkip:!isDay,
               callback(v,i){ const l=this.chart.data.labels[i]; if(!isDay) return l;
                 return /^(02|07|12|17|22):00$/.test(l)?l:null; } } },
         y:{ stacked:true, position:"right", grid:{color:dark?"#16161a":"#2c2c30"}, border:{display:false},
@@ -975,10 +1040,15 @@ function mountDashboard(host, root, data){
     if(detail) opts.layout={padding:{top:18}};
     const type = c.datasets[0]?.type==="bar" ? "bar" : "line";
     // detail krijgt eigen kopieën van de datasets: Chart.js koppelt een dataset aan één grafiek
-    const datasets = detail ? c.datasets.map(d=>({...d})) : c.datasets;
+    const dk = host.classList.contains("dark");
+    let datasets = detail ? c.datasets.map(d=>({...d})) : c.datasets;
+    // dark theme: staven tekent het metal-plugin zelf; lijnen krijgen een heldere kern en een rijker verloop
+    if(dk) datasets = datasets.map(d => d.yAxisID==="y2" ? d
+      : d.type==="bar" ? {...d, _metal:true, backgroundColor:"rgba(0,0,0,0)", borderWidth:0, maxBarThickness:16, categoryPercentage:.72, barPercentage:.82}
+      : {...d, borderColor:mixC(d._col,"w",.45), borderWidth:2.2, ...(d.backgroundColor!=="transparent"?{backgroundColor:metalFill(d._col)}:{})});
     return {type, data:{labels, datasets}, options:opts,
       plugins:[crosshair, ...(c.limit?[limitLine(c.limit)]:[]), ...(detail?[valueLabels]:[]),
-               ...(host.classList.contains("dark")?[glow]:[])]};
+               ...(host.classList.contains("dark")?[glow, metal]:[])]};
   }
 
   /* detailscherm: per kaart, liggend, met alle waarden */
