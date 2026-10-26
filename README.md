@@ -16,9 +16,8 @@ De data komt uit de HomeWizard-integratie die je al in HA hebt draaien.
 - **Detailscherm per grafiek:** tik op het icoon van een kaart. Schermvullend met legenda, de
   geselecteerde staaf met alle waarden en de waarde boven elke staaf; kantel je telefoon voor een
   liggende weergave. De terug-pijl (of de terugknop) brengt je terug.
-- **Licht en donker thema:** het donkere thema heeft geen tegels en laat de grafieken in elkaar
-  overlopen. Staven zijn afgerond gunmetal, belicht door een lamp in de eigen kleur, met een
-  subtiele reflectie op de vloer; lijnen hebben een heldere kern met een rustige gloed. Wisselen kan met de
+- **Licht en donker thema:** het donkere thema heeft geen tegels, laat de grafieken in elkaar
+  overlopen en laat lijnen, staven en waarden gloeien in hun eigen kleur. Wisselen kan met de
   zon/maan-knop rechtsboven of via de optie *Thema*.
 - **Zwevende periodekiezer:** Nu, Dag, Week, Maand en Jaar met datumnavigatie; geldt voor alle
   kaarten tegelijk. Aanraakcursor met waarden per grafiek. Hetzelfde kleurgebruik als de app
